@@ -1,0 +1,221 @@
+/* PCB Detect AI - Premium Custom Styles */
+
+/* Import Outfit font for modern typography */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+/* Apply font to elements */
+html, body, [class*="css"], .stMarkdown, .stText, .stButton, .stTextInput, .stSelectbox {
+    font-family: 'Outfit', sans-serif !important;
+}
+
+/* Custom metric card component */
+.metric-card {
+    background-color: #ffffff;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 140px;
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+}
+
+.metric-card-border-blue {
+    border-left: 5px solid #2563EB;
+}
+
+.metric-card-border-green {
+    border-left: 5px solid #10B981;
+}
+
+.metric-card-border-red {
+    border-left: 5px solid #EF4444;
+}
+
+.metric-card-border-orange {
+    border-left: 5px solid #F59E0B;
+}
+
+.metric-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+
+.metric-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1E293B;
+    line-height: 1;
+}
+
+.metric-icon {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    font-size: 28px;
+    opacity: 0.8;
+}
+
+/* Prediction summary styles */
+.prediction-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.badge-healthy {
+    background-color: #D1FAE5;
+    color: #065F46;
+    border: 1px solid #10B981;
+}
+
+.badge-defective {
+    background-color: #FEE2E2;
+    color: #991B1B;
+    border: 1px solid #EF4444;
+}
+
+/* Custom styled tables */
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 15px;
+    text-align: left;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.styled-table th {
+    background-color: #2563EB;
+    color: #ffffff;
+    font-weight: 600;
+    padding: 12px 15px;
+}
+
+.styled-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #E2E8F0;
+    color: #334155;
+    background-color: #ffffff;
+}
+
+.styled-table tr:last-of-type td {
+    border-bottom: 2px solid #2563EB;
+}
+
+.styled-table tr:hover td {
+    background-color: #F1F5F9;
+}
+
+/* Custom containers styling */
+div[data-testid="stVerticalBlock"] > div:has(div.metric-card) {
+    padding: 0px !important;
+}
+
+/* Title bar styles */
+.app-header {
+    background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+    padding: 30px;
+    border-radius: 12px;
+    color: white;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.app-header h1 {
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+    font-size: 36px !important;
+    margin: 0 0 10px 0 !important;
+}
+
+.app-header p {
+    color: #94A3B8 !important;
+    font-size: 16px !important;
+    margin: 0 !important;
+    font-weight: 400;
+}
+
+/* Sidebar Custom Styling */
+section[data-testid="stSidebar"] {
+    background-color: #0F172A !important;
+}
+
+section[data-testid="stSidebar"] .stMarkdown, 
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span {
+    color: #F8FAFC !important;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label {
+    background-color: #1E293B;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-bottom: 8px;
+    border: 1px solid #334155;
+    transition: all 0.2s ease;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label:hover {
+    background-color: #2563EB;
+    border-color: #2563EB;
+}
+
+section[data-testid="stSidebar"] div[role="radiogroup"] label[data-checked="true"] {
+    background-color: #2563EB !important;
+    border-color: #2563EB !important;
+}
+
+/* Footer style */
+.footer-text {
+    text-align: center;
+    color: #64748B;
+    font-size: 13px;
+    padding: 20px 0 10px 0;
+    border-top: 1px solid #E2E8F0;
+    margin-top: 40px;
+}
+
+/* Custom styled status indicator in sidebar */
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #1E293B;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    margin-top: 10px;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #10B981;
+    box-shadow: 0 0 8px #10B981;
+}
+
+.status-text {
+    font-size: 14px;
+    font-weight: 500;
+}
