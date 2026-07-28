@@ -46,14 +46,14 @@ def show_dashboard():
         c_col1, c_col2 = st.columns([1, 1])
         with c_col1:
             pie_fig = create_pie_chart(df)
-            st.plotly_chart(pie_fig, use_container_width=True)
+            st.plotly_chart(pie_fig, use_container_width=True, key="dashboard_pie_chart")
         with c_col2:
             bar_fig = create_defect_bar_chart(df)
-            st.plotly_chart(bar_fig, use_container_width=True)
+            st.plotly_chart(bar_fig, use_container_width=True, key="dashboard_defect_bar_chart")
             
         # Row 2: Timeline
         time_fig = create_detections_time_chart(df)
-        st.plotly_chart(time_fig, use_container_width=True)
+        st.plotly_chart(time_fig, use_container_width=True, key="dashboard_timeline_chart")
         
     with recent_tab:
         st.subheader("Latest Detections")

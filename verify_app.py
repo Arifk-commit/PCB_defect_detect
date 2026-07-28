@@ -28,14 +28,11 @@ def run_checks():
         print(f"[ERROR] Import failure: {e}")
         return False
         
-    # 3. Test database setup and seeder
+    # 3. Test database setup
     try:
         init_db()
         history_list = get_history()
-        print(f"[OK] Success: Database initialized and seeded. Found {len(history_list)} records.")
-        if len(history_list) == 0:
-            print("[ERROR] Seeding did not insert records.")
-            return False
+        print(f"[OK] Success: Database initialized successfully. Found {len(history_list)} records.")
     except Exception as e:
         print(f"[ERROR] Database initialization failure: {e}")
         return False

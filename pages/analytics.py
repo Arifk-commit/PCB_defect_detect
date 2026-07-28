@@ -65,17 +65,17 @@ def show_analytics():
     st.subheader("Yield and Category Analytics")
     col_y1, col_y2 = st.columns(2)
     with col_y1:
-        st.plotly_chart(create_pie_chart(df), use_container_width=True)
+        st.plotly_chart(create_pie_chart(df), use_container_width=True, key="analytics_pie_chart")
     with col_y2:
-        st.plotly_chart(create_defect_bar_chart(df), use_container_width=True)
+        st.plotly_chart(create_defect_bar_chart(df), use_container_width=True, key="analytics_defect_bar_chart")
         
     st.write("---")
-    st.plotly_chart(create_detections_time_chart(df), use_container_width=True)
+    st.plotly_chart(create_detections_time_chart(df), use_container_width=True, key="analytics_timeline_chart")
     
     st.write("---")
     st.subheader("Temporal and Spatial Diagnostics")
     col_d1, col_d2 = st.columns(2)
     with col_d1:
-        st.plotly_chart(create_daily_hourly_heatmap(df), use_container_width=True)
+        st.plotly_chart(create_daily_hourly_heatmap(df), use_container_width=True, key="analytics_daily_hourly_heatmap")
     with col_d2:
-        st.plotly_chart(create_spatial_heatmap(df), use_container_width=True)
+        st.plotly_chart(create_spatial_heatmap(df), use_container_width=True, key="analytics_spatial_heatmap")

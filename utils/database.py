@@ -11,7 +11,7 @@ HISTORY_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'history'
 os.makedirs(HISTORY_DIR, exist_ok=True)
 
 def init_db():
-    """Initializes the database schema and seeds it with mock data if empty."""
+    """Initializes the database schema."""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
@@ -30,14 +30,6 @@ def init_db():
         )
     ''')
     conn.commit()
-    
-    # Check if empty
-    cursor.execute('SELECT COUNT(*) FROM history')
-    count = cursor.fetchone()[0]
-    
-    if count == 0:
-        seed_mock_data(conn)
-        
     conn.close()
 
 def create_placeholder_images(filename_base, prediction, defects):
