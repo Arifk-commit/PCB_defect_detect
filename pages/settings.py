@@ -90,6 +90,7 @@ def show_settings():
                 'font_size': font_size
             }
             st.success("✓ Settings updated successfully!")
+            st.rerun()
             
     st.write("---")
     st.subheader("Current Active Configuration Summary")

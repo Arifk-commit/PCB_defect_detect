@@ -5,15 +5,7 @@ import random
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-# Attempt to import Ultralytics YOLO
-YOLO_AVAILABLE = False
-try:
-    from ultralytics import YOLO
-    YOLO_AVAILABLE = True
-except ImportError:
-    pass
-
-MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'models', 'best.pt')
+from utils.model_loader import get_model
 
 def get_image_hash(image):
     """Generates a deterministic hash string from image pixel data."""
@@ -25,7 +17,7 @@ def get_image_hash(image):
 
 def predict_image(image, conf_threshold=0.25, iou_threshold=0.45, bbox_thickness=2, font_size=14, use_gpu=False):
     """
-    Main prediction pipeline. Attempts to load custom YOLOv11 model.
+    Main prediction pipeline. Attempts to load custom YOLOv11 model via shared loader.
     Falls back to a high-fidelity deterministic simulator if no model is found.
     
     Returns:
@@ -37,12 +29,12 @@ def predict_image(image, conf_threshold=0.25, iou_threshold=0.45, bbox_thickness
     """
     start_time = time.time()
     
-    # Try running standard YOLO if model weights file exists
-    if YOLO_AVAILABLE and os.path.exists(MODEL_PATH):
+    # Try loading the model from the centralized loader
+    model = get_model()
+    
+    if model is not None:
         try:
             device = 'cuda' if use_gpu else 'cpu'
-            # Load YOLO model
-            model = YOLO(MODEL_PATH)
             
             # Predict
             results = model.predict(image, conf=conf_threshold, iou=iou_threshold, device=device)

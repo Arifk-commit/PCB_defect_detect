@@ -74,20 +74,23 @@ def main():
     # 5. Sidebar System Status Indicator
     st.sidebar.subheader("SYSTEM DIAGNOSTICS")
     
-    # Check if a custom weights model is present
-    model_path = os.path.join(os.path.dirname(__file__), 'models', 'best.pt')
-    model_exists = os.path.exists(model_path)
+    # Query model loader status
+    from utils.model_loader import get_model
+    model = get_model()
+    model_loaded = (model is not None)
     
-    if model_exists:
-        status_label = "🟢 Ready (YOLOv11 Loaded)"
+    if model_loaded:
+        status_label = "🟢 YOLOv11 Model Loaded"
         model_type_text = "Custom YOLOv11 Model active"
+        dot_color = "#10B981"
     else:
-        status_label = "🔵 Ready (Simulator Mode)"
-        model_type_text = "Fallback simulator active"
+        status_label = "🔵 Simulator Fallback Active"
+        model_type_text = "Intelligent simulation active"
+        dot_color = "#3B82F6"
         
     st.sidebar.markdown(f"""
         <div class="status-indicator">
-            <div class="status-dot" style="background-color: {'#10B981' if model_exists else '#3B82F6'}; box-shadow: 0 0 8px {'#10B981' if model_exists else '#3B82F6'};"></div>
+            <div class="status-dot" style="background-color: {dot_color}; box-shadow: 0 0 8px {dot_color};"></div>
             <div class="status-text">{status_label}</div>
         </div>
     """, unsafe_allow_html=True)
