@@ -1,0 +1,32 @@
+# --- Virtual Environments ---
+PCB_defedt/
+venv/
+.venv/
+env/
+.env/
+
+# --- Python Bytecode & Cache ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.ipynb_checkpoints/
+
+# --- Model Weights (Binary Files) ---
+models/*.pt
+models/*.onnx
+models/*.engine
+
+# --- History Logs & Saved Images ---
+# We keep the directory structure but ignore the actual database and saved images
+history/*.db
+history/orig_*
+history/anno_*
+
+# --- Operating System Files ---
+.DS_Store
+Thumbs.db
+
+# --- Streamlit Config & Cache ---
+.streamlit/
