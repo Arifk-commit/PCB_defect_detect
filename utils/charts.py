@@ -4,263 +4,271 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
 
+# ── Shared layout defaults ──────────────────────────────────────────────────
+_CHART_LAYOUT = dict(
+    paper_bgcolor='#FFFFFF',
+    plot_bgcolor='#FAFBFC',
+    font=dict(family='Inter, sans-serif', size=12, color='#374151'),
+    margin=dict(t=48, b=36, l=16, r=16),
+    title_font=dict(size=15, weight=700, color='#0F172A'),
+    legend=dict(
+        font=dict(size=12, color='#374151'),
+        bgcolor='rgba(0,0,0,0)',
+        bordercolor='rgba(0,0,0,0)'
+    ),
+)
+
+_AXIS_STYLE = dict(
+    showgrid=True,
+    gridcolor='#E2E8F0',
+    gridwidth=1,
+    linecolor='#E2E8F0',
+    tickfont=dict(color='#374151', size=11),
+    title_font=dict(color='#374151', size=12),
+    zeroline=False,
+)
+
+_COLORS = ['#2563EB', '#EF4444', '#22C55E', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4']
+
+
 def prepare_dataframe(records):
-    """Converts a database records list of dicts to a pandas DataFrame."""
+    """Converts database records list to a pandas DataFrame."""
     if not records:
         return pd.DataFrame(columns=[
-            'id', 'filename', 'prediction', 'defect_count', 
+            'id', 'filename', 'prediction', 'defect_count',
             'defects_list', 'confidence', 'inference_time', 'timestamp'
         ])
     df = pd.DataFrame(records)
     df['timestamp'] = pd.to_datetime(df['timestamp'])
-    df['date'] = df['timestamp'].dt.date
-    df['hour'] = df['timestamp'].dt.hour
+    df['date']     = df['timestamp'].dt.date
+    df['hour']     = df['timestamp'].dt.hour
     df['day_name'] = df['timestamp'].dt.day_name()
     return df
 
+
 def create_pie_chart(df):
-    """Generates a pie chart of Healthy vs Defective PCB rates."""
+    """Donut chart: Healthy vs Defective split."""
     if df.empty:
         fig = go.Figure()
-        fig.update_layout(title="No Data Available")
+        fig.update_layout(title="No Data Yet", **_CHART_LAYOUT)
         return fig
-        
-    counts = df['prediction'].value_counts()
-    
-    # Map colors to predictions
-    color_map = {'Healthy': '#10B981', 'Defective': '#EF4444'}
-    colors = [color_map.get(x, '#2563EB') for x in counts.index]
-    
-    fig = px.pie(
-        names=counts.index,
+
+    counts    = df['prediction'].value_counts()
+    color_map = {'Healthy': '#22C55E', 'Defective': '#EF4444'}
+    colors    = [color_map.get(x, '#2563EB') for x in counts.index]
+
+    fig = go.Figure(go.Pie(
+        labels=counts.index,
         values=counts.values,
-        color=counts.index,
-        color_discrete_map=color_map,
-        hole=0.4,
-        title="Inspection Results Summary"
-    )
-    
-    fig.update_traces(
-        textposition='inside', 
+        hole=0.45,
+        marker=dict(colors=colors, line=dict(color='#FFFFFF', width=2)),
         textinfo='percent+label',
-        hoverinfo='label+value',
-        marker=dict(line=dict(color='#FFFFFF', width=2))
-    )
-    
+        textfont=dict(size=12, color='#374151'),
+        hovertemplate='<b>%{label}</b><br>Count: %{value}<br>Share: %{percent}<extra></extra>',
+    ))
+
     fig.update_layout(
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Outfit, sans-serif', size=13),
-        margin=dict(t=40, b=20, l=20, r=20),
-        legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5)
+        title=dict(text='Inspection Results', x=0.5, xanchor='center'),
+        legend=dict(orientation='h', yanchor='bottom', y=-0.15, xanchor='center', x=0.5,
+                    font=dict(color='#374151', size=12)),
+        **_CHART_LAYOUT
     )
     return fig
 
+
 def create_defect_bar_chart(df):
-    """Generates a bar chart detailing the count of individual defect types."""
+    """Horizontal bar chart: defect category frequencies."""
     if df.empty:
         fig = go.Figure()
+        fig.update_layout(title="No Data Yet", **_CHART_LAYOUT)
         return fig
-        
-    # Extract defect counts from defects_list
+
     defects = []
     for val in df['defects_list'].dropna():
         if val:
-            defects.extend(val.split(','))
-            
+            defects.extend([d.strip() for d in val.split(',')])
+
     if not defects:
-        # Return empty placeholder
         fig = go.Figure()
-        fig.update_layout(
-            title="No Defects Detected",
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)'
+        fig.add_annotation(
+            text="No defects recorded yet",
+            showarrow=False,
+            font=dict(size=14, color='#94A3B8'),
+            x=0.5, y=0.5, xref='paper', yref='paper'
         )
+        fig.update_layout(title="Defect Categories", **_CHART_LAYOUT)
         return fig
-        
+
     defect_counts = pd.Series(defects).value_counts().reset_index()
-    defect_counts.columns = ['Defect Type', 'Frequency']
-    
-    fig = px.bar(
-        defect_counts,
-        x='Frequency',
-        y='Defect Type',
+    defect_counts.columns = ['Defect Type', 'Count']
+
+    fig = go.Figure(go.Bar(
+        x=defect_counts['Count'],
+        y=defect_counts['Defect Type'],
         orientation='h',
-        color='Defect Type',
-        color_discrete_sequence=['#2563EB', '#F59E0B', '#EF4444', '#10B981', '#8B5CF6', '#EC4899'],
-        title="Defect Category Breakdown"
-    )
-    
+        marker=dict(
+            color=_COLORS[:len(defect_counts)],
+            line=dict(color='rgba(0,0,0,0)', width=0)
+        ),
+        text=defect_counts['Count'],
+        textposition='outside',
+        textfont=dict(color='#374151', size=11),
+        hovertemplate='<b>%{y}</b><br>Count: %{x}<extra></extra>',
+    ))
+
     fig.update_layout(
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Outfit, sans-serif', size=13),
-        margin=dict(t=40, b=20, l=20, r=20),
-        xaxis=dict(showgrid=True, gridcolor='#E2E8F0'),
-        yaxis=dict(categoryorder='total ascending'),
-        showlegend=False
+        title=dict(text='Defect Category Breakdown', x=0.5, xanchor='center'),
+        xaxis=dict(title='Frequency', **_AXIS_STYLE),
+        yaxis=dict(categoryorder='total ascending', **_AXIS_STYLE),
+        showlegend=False,
+        **_CHART_LAYOUT
     )
     return fig
 
+
 def create_detections_time_chart(df):
-    """Generates a line chart displaying historical inspections and defect rate over time."""
+    """Line chart: daily inspection count and defect rate over time."""
     if df.empty:
         fig = go.Figure()
+        fig.update_layout(title="No Data Yet", **_CHART_LAYOUT)
         return fig
-        
-    # Group by date
+
     timeline = df.groupby('date').agg(
         total_runs=('id', 'count'),
         defects=('prediction', lambda x: (x == 'Defective').sum())
-    ).reset_index()
-    
-    timeline = timeline.sort_values('date')
-    
+    ).reset_index().sort_values('date')
+
     fig = go.Figure()
-    
-    # Total Runs
+
     fig.add_trace(go.Scatter(
-        x=timeline['date'],
-        y=timeline['total_runs'],
+        x=timeline['date'], y=timeline['total_runs'],
         mode='lines+markers',
         name='Total Inspected',
-        line=dict(color='#2563EB', width=3),
-        marker=dict(size=6)
+        line=dict(color='#2563EB', width=2.5),
+        marker=dict(size=7, color='#2563EB', line=dict(color='#FFFFFF', width=2)),
+        fill='tozeroy',
+        fillcolor='rgba(37,99,235,0.07)',
+        hovertemplate='%{x}<br>Total: %{y}<extra></extra>',
     ))
-    
-    # Defective Runs
+
     fig.add_trace(go.Scatter(
-        x=timeline['date'],
-        y=timeline['defects'],
+        x=timeline['date'], y=timeline['defects'],
         mode='lines+markers',
-        name='Defective Boards',
-        line=dict(color='#EF4444', width=3, dash='dash'),
-        marker=dict(size=6)
+        name='Defective',
+        line=dict(color='#EF4444', width=2.5, dash='dash'),
+        marker=dict(size=7, color='#EF4444', line=dict(color='#FFFFFF', width=2)),
+        hovertemplate='%{x}<br>Defective: %{y}<extra></extra>',
     ))
-    
+
     fig.update_layout(
-        title="Inspection Yield Trend (Last 30 Days)",
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Outfit, sans-serif', size=13),
-        margin=dict(t=40, b=20, l=20, r=20),
-        xaxis=dict(showgrid=True, gridcolor='#E2E8F0', title="Inspection Date"),
-        yaxis=dict(showgrid=True, gridcolor='#E2E8F0', title="Board Count"),
-        legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5)
+        title=dict(text='Inspection Yield Trend', x=0.5, xanchor='center'),
+        xaxis=dict(title='Date', **_AXIS_STYLE),
+        yaxis=dict(title='Boards', **_AXIS_STYLE),
+        legend=dict(orientation='h', yanchor='bottom', y=-0.25, xanchor='center', x=0.5,
+                    font=dict(color='#374151', size=12)),
+        **_CHART_LAYOUT
     )
     return fig
+
 
 def create_daily_hourly_heatmap(df):
-    """Generates a temporal heatmap comparing Weekday vs hour of inspections."""
+    """Heatmap: inspections by weekday × hour."""
     if df.empty:
         fig = go.Figure()
+        fig.update_layout(title="No Data Yet", **_CHART_LAYOUT)
         return fig
-        
-    # Create pivot table
+
     days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    
-    # Fill in all weekdays and hours to prevent blanks
-    heatmap_df = pd.DataFrame([(d, h) for d in days_order for h in range(24)], columns=['day_name', 'hour'])
-    
-    actual_counts = df.groupby(['day_name', 'hour']).size().reset_index(name='count')
-    heatmap_df = heatmap_df.merge(actual_counts, on=['day_name', 'hour'], how='left').fillna(0)
-    
-    pivot = heatmap_df.pivot(index='day_name', columns='hour', values='count')
-    pivot = pivot.reindex(days_order)
-    
+    all_combos = pd.DataFrame([(d, h) for d in days_order for h in range(24)], columns=['day_name', 'hour'])
+    actual     = df.groupby(['day_name', 'hour']).size().reset_index(name='count')
+    merged     = all_combos.merge(actual, on=['day_name', 'hour'], how='left').fillna(0)
+    pivot      = merged.pivot(index='day_name', columns='hour', values='count').reindex(days_order)
+
     fig = px.imshow(
         pivot,
-        labels=dict(x="Hour of Day", y="Day of Week", color="Inspections"),
+        labels=dict(x='Hour of Day', y='Day of Week', color='Inspections'),
         x=list(range(24)),
         y=days_order,
-        color_continuous_scale='Blues',
-        title="Temporal Inspection Distribution"
+        color_continuous_scale=[
+            [0.0, '#EFF6FF'], [0.25, '#BFDBFE'],
+            [0.5, '#60A5FA'], [0.75, '#2563EB'], [1.0, '#1E3A8A']
+        ],
+        aspect='auto',
     )
-    
+
     fig.update_layout(
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Outfit, sans-serif', size=13),
-        margin=dict(t=40, b=20, l=20, r=20)
+        title=dict(text='Temporal Inspection Distribution', x=0.5, xanchor='center'),
+        coloraxis_colorbar=dict(
+            tickfont=dict(color='#374151'),
+            title=dict(text='Count', font=dict(color='#374151')),
+        ),
+        xaxis=dict(title='Hour', tickfont=dict(color='#374151', size=10), title_font=dict(color='#374151')),
+        yaxis=dict(title='', tickfont=dict(color='#374151', size=11)),
+        **_CHART_LAYOUT
     )
     return fig
 
+
 def create_spatial_heatmap(df):
-    """Generates a spatial heatmap showing simulated coordinate locations of defects on a PCB canvas."""
+    """2D density contour: spatial defect hot-spots on PCB grid."""
     if df.empty:
         fig = go.Figure()
+        fig.update_layout(title="No Data Yet", **_CHART_LAYOUT)
         return fig
-        
-    # Extract bounding box centers dynamically or mock them based on records
-    # To keep it completely in theme, we parse individual records.
-    # If a record has defects, generate deterministic defect coordinate center points (X, Y) 
-    # to plot a spatial defect hot-spot chart.
-    x_coords = []
-    y_coords = []
-    labels = []
-    
-    for idx, row in df.iterrows():
+
+    x_coords, y_coords, labels = [], [], []
+    for _, row in df.iterrows():
         if row['prediction'] == 'Defective' and row['defects_list']:
-            defects = row['defects_list'].split(',')
-            for index, defect in enumerate(defects):
-                # Generate centers based on the database index & list index to make it look authentic and deterministic
-                np.random.seed(int(row['id']) + index)
-                x = np.random.randint(50, 590)
-                y = np.random.randint(50, 590)
-                x_coords.append(x)
-                y_coords.append(y)
-                labels.append(defect)
-                
+            for idx, defect in enumerate(row['defects_list'].split(',')):
+                np.random.seed(int(row['id']) + idx)
+                x_coords.append(np.random.randint(50, 590))
+                y_coords.append(np.random.randint(50, 590))
+                labels.append(defect.strip())
+
     if not x_coords:
-        # Create empty graph with board layout bounds
         fig = go.Figure()
-        fig.add_annotation(text="No spatial defect coordinates recorded", showarrow=False, font_size=14)
-        fig.update_layout(
-            title="Spatial Defect Distribution (Hot-spot Heatmap)",
-            xaxis=dict(range=[0, 640], showgrid=False, zeroline=False, visible=False),
-            yaxis=dict(range=[0, 640], showgrid=False, zeroline=False, visible=False),
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)'
+        fig.add_annotation(
+            text="No spatial defect data recorded",
+            showarrow=False, font=dict(size=14, color='#94A3B8'),
+            x=0.5, y=0.5, xref='paper', yref='paper'
         )
+        fig.update_layout(title="Spatial Defect Hotspots", **_CHART_LAYOUT)
         return fig
-        
-    # Create 2D density contour plot
+
     fig = go.Figure()
-    
-    # Add background outline representing PCB
-    fig.add_shape(type="rect", x0=10, y0=10, x1=630, y1=630,
-                  line=dict(color="#10B981", width=3), fillcolor="rgba(16, 185, 129, 0.05)")
-                  
-    # Add density contours
+
+    # PCB board outline
+    fig.add_shape(type='rect', x0=10, y0=10, x1=630, y1=630,
+                  line=dict(color='#22C55E', width=2),
+                  fillcolor='rgba(34,197,94,0.04)')
+
+    # Density contours
     fig.add_trace(go.Histogram2dContour(
-        x=x_coords,
-        y=y_coords,
-        colorscale='Reds',
-        reversescale=False,
-        name='Defect Density',
-        ncontours=15,
-        line=dict(width=0.5, color='rgba(239, 68, 68, 0.5)'),
-        contours=dict(coloring='heatmap')
+        x=x_coords, y=y_coords,
+        colorscale=[[0, 'rgba(239,68,68,0)'], [0.5, 'rgba(239,68,68,0.3)'], [1, 'rgba(239,68,68,0.8)']],
+        showscale=False, ncontours=12,
+        line=dict(width=0.5, color='rgba(239,68,68,0.3)'),
+        contours=dict(coloring='heatmap'),
+        name='Density',
     ))
-    
-    # Overlay defect dots
+
+    # Defect scatter dots
     fig.add_trace(go.Scatter(
-        x=x_coords,
-        y=y_coords,
+        x=x_coords, y=y_coords,
         mode='markers',
-        marker=dict(color='#EF4444', size=7, opacity=0.8, line=dict(color='#FFFFFF', width=1)),
+        marker=dict(color='#EF4444', size=8, opacity=0.85,
+                    line=dict(color='#FFFFFF', width=1.5)),
         text=labels,
-        hoverinfo='text+x+y',
-        name='Defect Incidents'
+        hovertemplate='<b>%{text}</b><br>X: %{x}, Y: %{y}<extra></extra>',
+        name='Defect Incidents',
     ))
-    
+
     fig.update_layout(
-        title="PCB Spatial Defect Hot-spots (640x640 Grid)",
-        xaxis=dict(range=[0, 640], showgrid=False, zeroline=False, title="Width (px)"),
-        yaxis=dict(range=[0, 640], showgrid=False, zeroline=False, title="Height (px)", scaleanchor="x", scaleratio=1),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Outfit, sans-serif', size=13),
-        margin=dict(t=40, b=20, l=20, r=20)
+        title=dict(text='PCB Spatial Defect Hotspots', x=0.5, xanchor='center'),
+        xaxis=dict(range=[0, 640], title='Width (px)', **_AXIS_STYLE),
+        yaxis=dict(range=[0, 640], title='Height (px)', scaleanchor='x', scaleratio=1, **_AXIS_STYLE),
+        showlegend=True,
+        legend=dict(font=dict(color='#374151', size=11), bgcolor='rgba(0,0,0,0)'),
+        **_CHART_LAYOUT
     )
     return fig

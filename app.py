@@ -1,105 +1,142 @@
 import streamlit as st
 import os
 
-# Set page configuration first
+# ── Page config MUST be first ─────────────────────────────────────────────────
 st.set_page_config(
-    page_title="PCB Detect AI - Vision Inspection System",
+    page_title="PCB Detect AI",
     page_icon="🔍",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 from utils.database import init_db
-from utils.helpers import inject_custom_css, load_logo_base64
-from pages.dashboard import show_dashboard
-from pages.image_detection import show_image_detection
-from pages.batch_detection import show_batch_detection
-from pages.live_camera import show_live_camera
-from pages.history import show_history
-from pages.analytics import show_analytics
-from pages.model_info import show_model_info
-from pages.settings import show_settings
+from utils.helpers import (
+    inject_custom_css, load_logo_base64,
+    render_navbar, render_footer
+)
+from utils.model_loader import get_model
+from views.dashboard import show_dashboard
+from views.image_detection import show_image_detection
+from views.batch_detection import show_batch_detection
+from views.live_camera import show_live_camera
+from views.history import show_history
+from views.analytics import show_analytics
+from views.model_info import show_model_info
+from views.settings import show_settings
+
+# ── Nav config ────────────────────────────────────────────────────────────────
+NAV_ITEMS = [
+    ("⬛  Dashboard",          "Dashboard"),
+    ("🔍  Image Detection",    "Image Detection"),
+    ("📦  Batch Detection",    "Batch Detection"),
+    ("📷  Live Camera",        "Live Camera"),
+    ("🗂  Detection History",  "Detection History"),
+    ("📊  Analytics",          "Analytics"),
+    ("🤖  Model Information",  "Model Information"),
+    ("⚙️  Settings",           "Settings"),
+]
+
+PAGE_TITLES = {
+    "Dashboard":         "Dashboard",
+    "Image Detection":   "Single Image Detection",
+    "Batch Detection":   "Batch Detection",
+    "Live Camera":       "Live Camera Feed",
+    "Detection History": "Detection History",
+    "Analytics":         "Analytics",
+    "Model Information": "Model Information",
+    "Settings":          "Settings",
+}
+
 
 def main():
-    # 1. Initialize SQLite Database (and seed mock historical entries if empty)
+    # 1. Init DB
     init_db()
-    
-    # 2. Inject custom premium CSS rules
+
+    # 2. Inject CSS + auto-expand JS
     inject_custom_css()
-    
-    # 3. Setup Default Session States
+
+    # 3. Session state defaults
     if 'settings' not in st.session_state:
         st.session_state.settings = {
             'conf_threshold': 0.25,
-            'iou_threshold': 0.45,
-            'use_gpu': False,
-            'save_images': True,
+            'iou_threshold':  0.45,
+            'use_gpu':        False,
+            'save_images':    True,
             'bbox_thickness': 2,
-            'font_size': 14
+            'font_size':      14,
         }
-        
     if 'camera_running' not in st.session_state:
         st.session_state.camera_running = False
-        
-    # 4. Sidebar Branding & Navigation
-    logo_base64 = load_logo_base64()
-    st.sidebar.markdown(f"""
-        <div style="text-align: center; margin: 20px 0;">
-            <img src="data:image/svg+xml;base64,{logo_base64}" width="220" />
+
+    # 4. Model status
+    model        = get_model()
+    model_loaded = model is not None
+
+    # ── Sidebar ───────────────────────────────────────────────────────────────
+    with st.sidebar:
+        logo_b64 = load_logo_base64()
+
+        # Logo
+        st.markdown(f"""
+        <div style="padding:20px 16px 12px 16px;">
+            <img src="data:image/svg+xml;base64,{logo_b64}" width="176" style="display:block;" />
         </div>
-    """, unsafe_allow_html=True)
-    
-    st.sidebar.write("---")
-    
-    # Navigation list
-    menu_options = [
-        "Dashboard", 
-        "Image Detection", 
-        "Batch Detection", 
-        "Live Camera", 
-        "Detection History", 
-        "Analytics", 
-        "Model Information", 
-        "Settings"
-    ]
-    
-    selected_page = st.sidebar.radio(
-        "NAVIGATION MENU", 
-        menu_options,
-        index=0
-    )
-    
-    st.sidebar.write("---")
-    
-    # 5. Sidebar System Status Indicator
-    st.sidebar.subheader("SYSTEM DIAGNOSTICS")
-    
-    # Query model loader status
-    from utils.model_loader import get_model
-    model = get_model()
-    model_loaded = (model is not None)
-    
-    if model_loaded:
-        status_label = "🟢 YOLOv11 Model Loaded"
-        model_type_text = "Custom YOLOv11 Model active"
-        dot_color = "#10B981"
-    else:
-        status_label = "🔵 Simulator Fallback Active"
-        model_type_text = "Intelligent simulation active"
-        dot_color = "#3B82F6"
-        
-    st.sidebar.markdown(f"""
-        <div class="status-indicator">
-            <div class="status-dot" style="background-color: {dot_color}; box-shadow: 0 0 8px {dot_color};"></div>
-            <div class="status-text">{status_label}</div>
+        """, unsafe_allow_html=True)
+
+        # Nav label
+        st.markdown("""
+        <hr style="border:none;border-top:1px solid #1E293B;margin:0 12px 10px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;color:#475569;
+                    text-transform:uppercase;padding:0 18px 6px;">Navigation</div>
+        """, unsafe_allow_html=True)
+
+        # Navigation radio
+        labels = [lbl for lbl, _ in NAV_ITEMS]
+        names  = [nm  for _, nm  in NAV_ITEMS]
+
+        selected_label = st.radio(
+            "Navigation",
+            labels,
+            index=0,
+            label_visibility="collapsed"
+        )
+        selected_page = names[labels.index(selected_label)]
+
+        # System Status
+        if model_loaded:
+            dot_color   = "#22C55E"
+            status_text = "YOLOv11 Loaded"
+        else:
+            dot_color   = "#3B82F6"
+            status_text = "Simulator Active"
+
+        conf_val = st.session_state.settings['conf_threshold']
+        iou_val  = st.session_state.settings['iou_threshold']
+        device   = "GPU (CUDA)" if st.session_state.settings['use_gpu'] else "CPU"
+
+        st.markdown(f"""
+        <hr style="border:none;border-top:1px solid #1E293B;margin:12px 12px 10px;">
+        <div style="padding:0 16px 20px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:0.12em;color:#475569;
+                        text-transform:uppercase;margin-bottom:10px;">System Status</div>
+            <div style="display:flex;align-items:center;gap:9px;background:#1E293B;
+                        border-radius:9px;padding:10px 13px;margin-bottom:12px;">
+                <span style="width:8px;height:8px;border-radius:50%;background:{dot_color};
+                             box-shadow:0 0 8px {dot_color};display:inline-block;flex-shrink:0;"></span>
+                <span style="font-size:13px;font-weight:600;color:#E2E8F0;">{status_text}</span>
+            </div>
+            <div style="font-size:11.5px;color:#475569;line-height:2.1;padding:0 2px;">
+                Device: <span style="color:#94A3B8;">{device}</span><br>
+                Confidence: <span style="color:#94A3B8;">{conf_val}</span><br>
+                IoU: <span style="color:#94A3B8;">{iou_val}</span>
+            </div>
         </div>
-    """, unsafe_allow_html=True)
-    
-    st.sidebar.caption(f"Engine: {model_type_text}")
-    st.sidebar.caption(f"Device: {'GPU (CUDA)' if st.session_state.settings['use_gpu'] else 'CPU'}")
-    st.sidebar.caption("Software Version: v1.0.0")
-    
-    # 6. Page View Routing
+        """, unsafe_allow_html=True)
+
+    # ── Top Navbar ────────────────────────────────────────────────────────────
+    render_navbar(PAGE_TITLES[selected_page], model_loaded)
+
+    # ── Page Routing ──────────────────────────────────────────────────────────
     if selected_page == "Dashboard":
         show_dashboard()
     elif selected_page == "Image Detection":
@@ -116,13 +153,10 @@ def main():
         show_model_info()
     elif selected_page == "Settings":
         show_settings()
-        
-    # 7. Global Sticky Footer
-    st.markdown("""
-        <div class="footer-text">
-            <strong>PCB Detect AI</strong> - Industrial Vision Quality Inspection Suite | Built with Streamlit and Ultralytics YOLOv11 | Version 1.0.0
-        </div>
-    """, unsafe_allow_html=True)
+
+    # ── Footer ────────────────────────────────────────────────────────────────
+    render_footer()
+
 
 if __name__ == "__main__":
     main()
