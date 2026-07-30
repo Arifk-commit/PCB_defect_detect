@@ -81,7 +81,10 @@ def predict_image(image, conf_threshold=0.25, iou_threshold=0.45, bbox_thickness
     # --- Fallback Simulation Engine ---
     # Convert image to PIL if it's numpy array
     if not isinstance(image, Image.Image):
-        image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        if isinstance(image, np.ndarray) and len(image.shape) == 3 and image.shape[2] == 3:
+            image = Image.fromarray(image[:, :, ::-1])
+        else:
+            image = Image.fromarray(image)
     
     width, height = image.size
     

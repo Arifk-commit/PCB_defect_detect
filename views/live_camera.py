@@ -1,5 +1,8 @@
 import streamlit as st
-import cv2
+try:
+    import cv2
+except ImportError:
+    cv2 = None
 import time
 import numpy as np
 from PIL import Image, ImageDraw
@@ -48,14 +51,22 @@ def show_live_camera():
     frame_placeholder = st.empty()
     
     if st.session_state.camera_running:
-        # Try accessing the camera
-        cap = cv2.VideoCapture(0)
         camera_failed = False
-        
-        if not cap.isOpened():
+        cap = None
+        if cv2 is None:
             camera_failed = True
-            st.warning("⚠️ Physical webcam device not detected. Initiating simulated production line feed...")
-            cap.release()
+            st.warning("⚠️ Physical camera hardware unavailable on server. Initiating simulated production line feed...")
+        else:
+            try:
+                cap = cv2.VideoCapture(0)
+                if not cap.isOpened():
+                    camera_failed = True
+                    st.warning("⚠️ Physical webcam device not detected. Initiating simulated production line feed...")
+                    if cap:
+                        cap.release()
+            except Exception:
+                camera_failed = True
+                st.warning("⚠️ Physical webcam device not available. Initiating simulated production line feed...")
             
         prev_time = time.time()
         
@@ -139,7 +150,7 @@ def show_live_camera():
             # Add short buffer to match realistic sensor framerate
             time.sleep(0.03)
             
-        if not camera_failed:
+        if not camera_failed and cap is not None:
             cap.release()
             
         frame_placeholder.empty()
