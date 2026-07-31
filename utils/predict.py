@@ -50,6 +50,21 @@ def predict_image(image, conf_threshold=0.25, iou_threshold=0.45, bbox_thickness
             annotated_image = image.copy() if isinstance(image, Image.Image) else Image.fromarray(image)
             draw = ImageDraw.Draw(annotated_image)
             
+            DEFECT_COLORS = {
+                'missing_hole': '#EF4444',
+                'mouse_bite': '#F59E0B',
+                'open_circuit': '#EF4444',
+                'short': '#3B82F6',
+                'spur': '#10B981',
+                'spurious_copper': '#8B5CF6',
+                'Missing Hole': '#EF4444',
+                'Mouse Bite': '#F59E0B',
+                'Open Circuit': '#EF4444',
+                'Short': '#3B82F6',
+                'Spur': '#10B981',
+                'Spurious Copper': '#8B5CF6'
+            }
+
             for box_data in result.boxes:
                 coords = box_data.xyxy[0].tolist() # xmin, ymin, xmax, ymax
                 conf = float(box_data.conf[0])
@@ -66,7 +81,8 @@ def predict_image(image, conf_threshold=0.25, iou_threshold=0.45, bbox_thickness
                     total_conf += conf
                     
                     # Draw custom styled bbox
-                    draw_custom_box(draw, coords, label, conf, bbox_thickness, font_size)
+                    box_color = DEFECT_COLORS.get(label, '#EF4444')
+                    draw_custom_box(draw, coords, label, conf, bbox_thickness, font_size, color=box_color)
             
             avg_confidence = total_conf / defect_count if defect_count > 0 else 0.95
             prediction = "Defective" if defect_count > 0 else "Healthy"
