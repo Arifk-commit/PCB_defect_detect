@@ -2,7 +2,7 @@ import os
 import streamlit as st
 
 # Default Hugging Face repository and model filename settings
-HF_REPO_ID = "Arifk-commit/PCB_defect_detect"
+HF_REPO_ID = "Arifk-commit/PCB_defect_detect_YOLO_V8s"
 HF_FILENAME = "best.pt"
 
 # Local model cache paths
