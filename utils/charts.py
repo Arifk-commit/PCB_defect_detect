@@ -11,11 +11,6 @@ _CHART_LAYOUT = dict(
     font=dict(family='Inter, sans-serif', size=12, color='#374151'),
     margin=dict(t=48, b=36, l=16, r=16),
     title_font=dict(size=15, weight=700, color='#0F172A'),
-    legend=dict(
-        font=dict(size=12, color='#374151'),
-        bgcolor='rgba(0,0,0,0)',
-        bordercolor='rgba(0,0,0,0)'
-    ),
 )
 
 _AXIS_STYLE = dict(
