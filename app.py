@@ -48,6 +48,18 @@ PAGE_TITLES = {
 }
 
 
+@st.dialog("Model Loaded Successfully")
+def show_model_loaded_dialog():
+    st.success("✅ **YOLO AI Model Initialized** (`models/best.pt`)")
+    st.markdown("""
+    The PCB defect inspection model has been loaded into memory and is ready for real-time analysis.
+    - **Weights Path**: `models/best.pt`
+    - **Runtime Status**: Active & Ready
+    """)
+    if st.button("Continue to Dashboard", type="primary", use_container_width=True):
+        st.rerun()
+
+
 def main():
     # 1. Init DB
     init_db()
@@ -71,6 +83,11 @@ def main():
     # 4. Model status
     model        = get_model()
     model_loaded = model is not None
+
+    if model_loaded and not st.session_state.get('model_dialog_shown', False):
+        st.session_state.model_dialog_shown = True
+        st.toast("✅ YOLO Model Loaded Successfully (models/best.pt)", icon="🤖")
+        show_model_loaded_dialog()
 
     # ── Sidebar ───────────────────────────────────────────────────────────────
     with st.sidebar:
