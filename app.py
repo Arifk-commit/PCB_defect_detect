@@ -122,7 +122,7 @@ def main():
         # System Status
         if model_loaded:
             dot_color   = "#22C55E"
-            status_text = "YOLOv11 Loaded"
+            status_text = "YOLOv11m Loaded"
         else:
             dot_color   = "#3B82F6"
             status_text = "Simulator Active"

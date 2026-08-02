@@ -10,7 +10,7 @@ def show_image_detection():
     render_page_header(
         "AI Inspection",
         "Single Image Detection",
-        "Upload a PCB board image to run instant defect analysis with YOLOv11"
+        "Upload a PCB board image to run instant defect analysis with YOLOv11m"
     )
 
     if 'settings' not in st.session_state:

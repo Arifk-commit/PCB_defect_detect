@@ -17,7 +17,7 @@ def get_image_hash(image):
 
 def predict_image(image, conf_threshold=0.25, iou_threshold=0.45, bbox_thickness=2, font_size=14, use_gpu=False):
     """
-    Main prediction pipeline. Attempts to load custom YOLOv11 model via shared loader.
+    Main prediction pipeline. Attempts to load custom YOLOv11m model via shared loader.
     Falls back to a high-fidelity deterministic simulator if no model is found.
     
     Returns:

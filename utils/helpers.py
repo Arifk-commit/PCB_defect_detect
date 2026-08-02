@@ -58,7 +58,7 @@ def load_logo_base64():
 def render_navbar(page_title: str, model_loaded: bool = False):
     """Renders the custom sticky top navigation bar."""
     badge_cls  = "active" if model_loaded else "sim"
-    badge_text = "YOLOv11 Active" if model_loaded else "Simulator Mode"
+    badge_text = "YOLOv11m Active" if model_loaded else "Simulator Mode"
     st.markdown(f"""
     <div class="pcb-navbar">
         <div class="pcb-navbar-left">
@@ -231,7 +231,7 @@ def render_footer():
     st.markdown("""
     <div class="pcb-footer">
         <strong>PCB Detect AI</strong> · Industrial Vision Inspection Suite ·
-        Powered by Streamlit &amp; Ultralytics YOLOv11 · v1.0.0
+        Powered by Streamlit &amp; Ultralytics YOLOv11m · v1.0.0
     </div>
     """, unsafe_allow_html=True)
 

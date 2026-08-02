@@ -1,13 +1,13 @@
 # PCB Detect AI - Model Directory
 
-Place your custom-trained YOLOv11 PyTorch weights file in this directory and name it `best.pt`.
+Place your custom-trained YOLOv11m PyTorch weights file in this directory and name it `best.pt`.
 
 ## Directory Path:
 `models/best.pt`
 
 ## Model Format:
 * **Framework**: PyTorch (`.pt`)
-* **Ultralytics YOLO Compatibility**: The code expects a standard YOLOv11 model exported using the `ultralytics` package.
+* **Ultralytics YOLO Compatibility**: The code expects a standard YOLOv11m model exported using the `ultralytics` package.
 * **Input Size**: The model should be trained with an input size of `640x640`.
 * **Classes**: The default UI supports 6 defect classes:
   1. `Missing Hole`

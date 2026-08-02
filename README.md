@@ -1,6 +1,6 @@
 # PCB Detect AI - Industrial Vision Inspection Suite
 
-PCB Detect AI is a production-grade web application built to analyze Printed Circuit Board (PCB) images for manufacturing defects using YOLOv11 models. It features a modern, high-fidelity UI/UX styled like premium commercial AI SaaS interfaces.
+PCB Detect AI is a production-grade web application built to analyze Printed Circuit Board (PCB) images for manufacturing defects using YOLOv11mm models. It features a modern, high-fidelity UI/UX styled like premium commercial AI SaaS interfaces.
 
 ---
 
@@ -19,7 +19,7 @@ PCB Detect AI is a production-grade web application built to analyze Printed Cir
 ## 🛠️ Tech Stack
 
 * **Front-end**: Streamlit (layout grids, container objects, custom CSS stylesheets)
-* **Model Inference**: Ultralytics YOLOv11 & PyTorch
+* **Model Inference**: Ultralytics YOLOv11mm & PyTorch
 * **Computer Vision**: OpenCV (`cv2`) & Pillow (`PIL`)
 * **Data Processing**: Pandas & NumPy
 * **Analytics Rendering**: Plotly Express & Plotly Graph Objects
